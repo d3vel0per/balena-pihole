@@ -27,7 +27,7 @@ RUN curl -fsSL https://github.com/pi-hole/PADD/archive/v${PADD_VERSION}.tar.gz -
 
 ENV INTERFACE eth0
 ENV DNSMASQ_LISTENING single
-ENV PIHOLE_DNS_ 1.1.1.1;1.0.0.1
+ENV PIHOLE_DNS_ 8.8.4.4;8.8.8.8
 ENV FONTFACE Terminus
 ENV FONTSIZE 8x14
 ENV WEBPASSWORD balena

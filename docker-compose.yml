@@ -14,7 +14,7 @@ services:
       - "dnsmasq_config:/etc/dnsmasq.d"
     dns:
       - "127.0.0.1"
-      - "1.1.1.1"
+      - "8.8.4.4"
     network_mode: host
     labels:
       io.balena.features.dbus: "1"

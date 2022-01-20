@@ -37,3 +37,4 @@ data:
     - "raspberrypi4-64"
     - "fincm3"
     - "nanopi-neo-air"
+    - "bananapi-m1-plus"
