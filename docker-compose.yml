@@ -5,10 +5,11 @@ volumes:
   dnsmasq_config:
 
 services:
-  # https://hub.docker.com/r/pihole/pihole
   pihole:
     build: pihole
-    privileged: true
+    cap_add:
+      - SYS_TTY_CONFIG
+      - NET_ADMIN
     volumes:
       - "pihole_config:/etc/pihole"
       - "dnsmasq_config:/etc/dnsmasq.d"
@@ -18,11 +19,14 @@ services:
     network_mode: host
     labels:
       io.balena.features.dbus: "1"
+    devices:
+      - /dev/tty0
+      - /dev/tty1
+    tmpfs:
+      - /var/log/pihole
 
-  # https://github.com/klutchell/unbound-dnscrypt
   unbound:
     build: unbound
-    privileged: true
     ports:
       - "5053:5053/tcp"
       - "5053:5053/udp"
@@ -34,7 +38,7 @@ services:
 
   # https://github.com/balenablocks/hostname
   hostname:
-    image: balenablocks/hostname:latest
+    build: hostname
     restart: no
     labels:
       io.balena.features.supervisor-api: 1

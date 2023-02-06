@@ -1,29 +1,22 @@
 # https://hub.docker.com/r/pihole/pihole/tags
-FROM pihole/pihole:2022.01.1
+FROM pihole/pihole:2023.01.10
 
-WORKDIR /usr/src/app
-
-COPY cont-init.d/ /etc/cont-init.d/
-COPY services/ /etc/services.d/
+# https://serverfault.com/a/817791
+# force dnsmasq to bind only the interfaces it is listening on
+# otherwise dnsmasq will fail to start since balena is using 53 on some interfaces
+RUN echo "bind-interfaces" > /etc/dnsmasq.d/balena.conf
 
 ENV DEBIAN_FRONTEND noninteractive
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
-	apt-get install --no-install-recommends -y console-setup kmod dbus netcat && \
+	apt-get install --no-install-recommends -y console-setup dbus netcat && \
 	apt-get clean && rm -rf /var/lib/apt/lists/*
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+COPY cont-init.d/ /etc/cont-init.d/
+COPY s6-overlay/ /etc/s6-overlay/
 
-# https://github.com/pi-hole/PADD/releases
-ARG PADD_VERSION=3.6.3
-ARG PADD_SHA256=00894999c83608731aad9a337858ec010a0f5acd47840fb656c3b45867372419
-
-RUN curl -fsSL https://github.com/pi-hole/PADD/archive/v${PADD_VERSION}.tar.gz -o padd.tar.gz && \
-	echo "${PADD_SHA256}  padd.tar.gz" | sha256sum -c - && \
-	tar xzf padd.tar.gz --strip 1 && \
-	rm padd.tar.gz && \
-	chmod +x padd.sh
+RUN chmod +x /etc/cont-init.d/10-custom.sh
 
 ENV INTERFACE eth0
 ENV DNSMASQ_LISTENING single

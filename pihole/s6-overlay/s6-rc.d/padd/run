@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/command/with-contenv bash
 # shellcheck shell=bash
 
 # quit the plymouth (balena logo) service so that we can see the TTY
@@ -16,12 +16,13 @@ sed -i "s/^FONTFACE.*/FONTFACE=\"${FONTFACE}\"/" /etc/default/console-setup
 sed -i "s/^FONTSIZE.*/FONTSIZE=\"${FONTSIZE}\"/" /etc/default/console-setup
 dpkg-reconfigure console-setup 2> /dev/null > /dev/tty1
 
-# wait for FTL port to become available
-while ! nc -z 127.0.0.1 "$(</run/pihole-FTL.port)"
-do
-    s6-echo "Waiting for FTL on port $(</run/pihole-FTL.port)..."
-    sleep 5
-done
+# see https://github.com/klutchell/balena-pihole/issues/187
+s6-echo "Detecting screen size..."
+console_height="$(stty size -F /dev/tty1 | awk '{print $1}')"
+console_width="$(stty size -F /dev/tty1 | awk '{print $2}')"
+
+sed "s|console_height=.*|console_height=$console_height|" -i /usr/local/bin/padd
+sed "s|console_width=.*|console_width=$console_width|" -i /usr/local/bin/padd
 
 s6-echo "Starting PADD..."
-/usr/src/app/padd.sh 2> /dev/null > /dev/tty1
+/usr/local/bin/padd 2> /dev/null > /dev/tty1
